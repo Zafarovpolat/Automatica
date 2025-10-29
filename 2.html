@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUTOMATICA - Intelligent Automation Solutions</title>
+
+    <!-- Уникальные шрифты: Syne (заголовки) и DM Sans (текст) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Syne:wght@700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="./favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon/favicon-16x16.png">
+    <link rel="manifest" href="./favicon/site.webmanifest">
+
+
+    <style>
+        /* --- 1. Глобальные стили и переменные --- */
+        :root {
+            --bg-primary: #000000;
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(255, 255, 255, 0.2);
+
+            --font-body: 'DM Sans', sans-serif;
+            --font-heading: 'Syne', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            cursor: none;
+            /* Скрываем стандартный курсор */
+        }
+
+        /* Глобальный анимированный фон с "шумом" */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><g fill-opacity="0.22"><circle fill="%23FFFFFF" cx="400" cy="400" r="600"/><circle fill="%23000000" cx="400" cy="400" r="500"/><circle fill="%230e0e0e" cx="400" cy="400" r="400"/><circle fill="%231b1b1b" cx="400" cy="400" r="300"/><circle fill="%23292929" cx="400" cy="400" r="200"/><circle fill="%23363636" cx="400" cy="400" r="100"/></g></svg>');
+            background-size: cover;
+            opacity: 0.05;
+            z-index: -10;
+            animation: grain 8s steps(10) infinite;
+        }
+
+        @keyframes grain {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            10% {
+                transform: translate(-5%, -10%);
+            }
+
+            20% {
+                transform: translate(-15%, 5%);
+            }
+
+            30% {
+                transform: translate(7%, -25%);
+            }
+
+            40% {
+                transform: translate(-5%, 25%);
+            }
+
+            50% {
+                transform: translate(-15%, 10%);
+            }
+
+            60% {
+                transform: translate(15%, 0%);
+            }
+
+            70% {
+                transform: translate(0%, 15%);
+            }
+
+            80% {
+                transform: translate(3%, 35%);
+            }
+
+            90% {
+                transform: translate(-10%, 10%);
+            }
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        p {
+            line-height: 1.8;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Анимируемый разделитель */
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: var(--border-color);
+            margin: 150px 0;
+            transform: scaleX(0);
+            transform-origin: left;
+        }
+
+        /* --- 2. Интерактивный курсор и глобальные компоненты --- */
+
+        /* Кастомный курсор */
+        .cursor-dot,
+        .cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 9999;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-primary);
+        }
+
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--text-primary);
+            transition: transform 0.2s ease-out, width 0.3s, height 0.3s;
+        }
+
+        /* Навигация */
+        .main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 25px 0;
+            z-index: 900;
+            transition: background-color 0.3s ease;
+        }
+
+        .main-header.scrolled {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 28px;
+            font-weight: 800;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .main-nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-left: 40px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        /* --- 3. Стили для секций --- */
+
+        /* Hero Section с эффектом "светового пульса" */
+        .hero-section {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-pulse {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 20%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 9vw;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            line-height: 1;
+            color: var(--text-primary);
+        }
+
+        .hero-title .char {
+            /* Для посимвольной анимации */
+            display: inline-block;
+        }
+
+        .hero-subtitle {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* About Section с декоративной типографикой */
+        .about-section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .about-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 100px;
+            align-items: center;
+        }
+
+        .about-deco {
+            font-size: 30vw;
+            font-family: var(--font-heading);
+            color: rgba(255, 255, 255, 0.05);
+            text-align: center;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .about-text h2 {
+            font-size: 4rem;
+            margin-bottom: 30px;
+        }
+
+        /* Для анимации появления текста по словам */
+        .about-text .word {
+            display: inline-block;
+            opacity: 0.1;
+            transition: opacity 0.4s;
+        }
+
+        .about-text .word.is-in-view {
+            opacity: 1;
+        }
+
+        /* Services Section с 3D эффектом */
+        .services-section {
+            padding: 100px 0;
+            overflow: hidden;
+        }
+
+        .services-wrapper {
+            height: 100vh;
+            position: relative;
+            perspective: 1000px;
+            /* Для 3D эффекта */
+        }
+
+        .services-title {
+            position: absolute;
+            top: 15vh;
+            left: 5%;
+            font-size: 5rem;
+            z-index: 5;
+        }
+
+        .services-container {
+            display: flex;
+            width: 300%;
+            /* 3 карточки */
+            height: 100%;
+            align-items: center;
+        }
+
+        .service-card {
+            width: calc(100% / 3);
+            flex-shrink: 0;
+            padding: 0 80px;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .service-card h3 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        /* Portfolio Section с интерактивными карточками */
+        .portfolio-section {
+            padding: 150px 0;
+        }
+
+        .portfolio-section h2 {
+            font-size: 5rem;
+            text-align: center;
+            margin-bottom: 100px;
+        }
+
+        .portfolio-grid {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .portfolio-item {
+            position: relative;
+            padding: 60px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .portfolio-item:first-child {
+            border-top: 1px solid var(--border-color);
+        }
+
+        .portfolio-item h3 {
+            font-size: 4rem;
+            font-weight: 700;
+        }
+
+        .portfolio-item span {
+            color: var(--text-secondary);
+        }
+
+        .portfolio-item .bg-element {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: var(--text-primary);
+            opacity: 0.0;
+            border-radius: 50%;
+            transform: translate(100%, -50%);
+            z-index: -1;
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s ease-in-out;
+        }
+
+        .portfolio-item:hover .bg-element {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0.3;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 150px 0;
+            text-align: center;
+        }
+
+        .contact-section h2 {
+            font-size: 8vw;
+            line-height: 1;
+            margin-bottom: 40px;
+        }
+
+        .contact-link {
+            display: inline-block;
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            position: relative;
+        }
+
+        .contact-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--text-primary);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .contact-link:hover::after {
+            transform: scaleX(1);
+        }
+
+        /* Footer */
+        .main-footer {
+            padding: 100px 0 50px;
+            text-align: center;
+        }
+
+        .footer-links {
+            margin-bottom: 30px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            margin: 0 20px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* --- 4. Адаптивность --- */
+        /* @media (max-width: 768px) {
+            body {
+                cursor: auto;
+            }
+
+            .cursor-dot,
+            .cursor-outline {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 16vw;
+            }
+
+            .about-container {
+                grid-template-columns: 1fr;
+            }
+
+            .about-deco {
+                display: none;
+            }
+
+            .services-section {
+                height: auto;
+            }
+
+            .services-wrapper {
+                height: auto;
+            }
+
+            .services-container {
+                flex-direction: column;
+                width: 100%;
+                align-items: flex-start;
+            }
+
+            .service-card {
+                width: 100%;
+                padding: 50px 20px;
+            }
+
+            .portfolio-item h3 {
+                font-size: 2.5rem;
+            }
+
+            .contact-link {
+                font-size: 1.8rem;
+            }
+        } */
+
+        @media (max-width: 830px) {
+            body {
+                cursor: auto;
+            }
+
+            .cursor-dot,
+            .cursor-outline {
+                display: none;
+            }
+
+            /* Навигация */
+            .main-nav {
+                display: none;
+            }
+
+            .burger-menu {
+                display: flex;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+
+            /* Hero */
+            .hero-title {
+                font-size: 9vw;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+                padding: 0 20px;
+            }
+
+            /* About */
+            .about-section {
+                padding: 80px 0;
+            }
+
+            .about-container {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+
+            .about-deco {
+                font-size: 40vw;
+            }
+
+            .about-text h2 {
+                font-size: 3rem;
+            }
+
+            .about-text p {
+                font-size: 1rem;
+            }
+
+            /* Services */
+            .services-section {
+                padding: 80px 0;
+            }
+
+            .services-wrapper {
+                height: auto;
+                width: 90%;
+                margin: auto;
+            }
+
+            .services-title {
+                position: relative;
+                top: 0;
+                left: 0;
+                font-size: 3.5rem;
+                margin-bottom: 50px;
+            }
+
+            .services-container {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .service-card {
+                width: 100%;
+                padding: 40px 30px;
+                border-left: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .service-card:last-child {
+                border-bottom: none;
+            }
+
+            .service-card h3 {
+                font-size: 2rem;
+            }
+
+            .service-card p {
+                font-size: 1rem;
+            }
+
+            /* Portfolio */
+            .portfolio-section {
+                padding: 100px 0;
+            }
+
+            .portfolio-section h2 {
+                font-size: 3.5rem;
+                margin-bottom: 60px;
+            }
+
+            .portfolio-item {
+                padding: 40px 0;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .portfolio-item h3 {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+            }
+
+            .portfolio-item span {
+                font-size: 0.9rem;
+            }
+
+            /* Contact */
+            .contact-section {
+                padding: 100px 0;
+            }
+
+            .contact-section h2 {
+                font-size: 8vw;
+            }
+
+            .contact-link {
+                font-size: 1.5rem;
+            }
+
+            /* Footer */
+            .main-footer {
+                padding: 80px 0 40px;
+            }
+
+            .footer-links a {
+                display: inline-block;
+                margin: 10px 15px;
+            }
+
+            /* Divider */
+            .divider {
+                margin: 100px 0;
+            }
+        }
+
+        /* Мобильные устройства (480px и меньше) */
+        @media (max-width: 576px) {
+            p {
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+            /* Hero */
+            .hero-title {
+                font-size: 15vw;
+            }
+
+            .hero-subtitle {
+                font-size: 0.9rem;
+            }
+
+            /* About */
+            .about-section {
+                padding: 60px 0;
+            }
+
+            .about-text h2 {
+                font-size: 2.2rem;
+                margin-bottom: 20px;
+            }
+
+            .about-deco {
+                display: none;
+            }
+
+            /* Services */
+            .services-section {
+                padding: 60px 0;
+            }
+
+            .services-wrapper {
+                width: 95%;
+            }
+
+            .services-title {
+                font-size: 2.5rem;
+                margin-bottom: 40px;
+            }
+
+            .service-card {
+                padding: 30px 20px;
+            }
+
+            .service-card h3 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            .service-card p {
+                font-size: 0.9rem;
+            }
+
+            /* Portfolio */
+            .portfolio-section {
+                padding: 80px 0;
+            }
+
+            .portfolio-section h2 {
+                font-size: 2.5rem;
+                margin-bottom: 40px;
+            }
+
+            .portfolio-item {
+                padding: 30px 0;
+            }
+
+            .portfolio-item h3 {
+                font-size: 1.8rem;
+            }
+
+            .portfolio-item span {
+                font-size: 0.85rem;
+            }
+
+            .portfolio-item .bg-element {
+                display: none;
+            }
+
+            /* Contact */
+            .contact-section {
+                padding: 80px 0;
+            }
+
+            .contact-section h2 {
+                font-size: 8vw;
+                margin-bottom: 30px;
+            }
+
+            .contact-link {
+                font-size: 1.5rem;
+            }
+
+            /* Footer */
+            .main-footer {
+                padding: 60px 0 30px;
+            }
+
+            .footer-links a {
+                display: block;
+                margin: 15px 0;
+            }
+
+            .copyright {
+                font-size: 0.8rem;
+            }
+
+            /* Divider */
+            .divider {
+                margin: 80px 0;
+            }
+
+            /* Mobile Menu */
+            .mobile-menu a {
+                font-size: 2rem;
+                margin: 15px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Кастомный курсор -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Шапка сайта -->
+    <header class="main-header">
+        <div class="nav-container container">
+            <a href="#hero" class="logo magnetic-element">AUTOMATICA</a>
+            <nav class="main-nav">
+                <a href="#about" class="magnetic-element">О нас</a>
+                <a href="#services" class="magnetic-element">Услуги</a>
+                <a href="#portfolio" class="magnetic-element">Проекты</a>
+                <a href="#contact" class="magnetic-element">Контакт</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Секция Hero -->
+        <section id="hero" class="hero-section">
+            <div class="hero-pulse"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">LIFE WITH AI</h1>
+                <p class="hero-subtitle">Мы автоматизируем бизнес-процессы с помощью искусственного интеллекта. От
+                    веб-разработки до AI-агентов — превращаем рутину в эффективность.</p>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Секция "О нас" -->
+        <section id="about" class="about-section">
+            <div class="container about-container">
+                <div class="about-deco">A</div>
+                <div class="about-text">
+                    <h2>Автоматизация будущего</h2>
+                    <p class="reveal-text">Мы создаем интеллектуальные системы, которые работают за вас. Наш подход
+                        объединяет передовые AI-технологии с глубоким пониманием бизнес-процессов, чтобы освободить ваше
+                        время для стратегических задач.</p>
+                    <p class="reveal-text">От умных чат-ботов до полноценных AI-агентов, от корпоративных сайтов до
+                        сложных аналитических платформ — каждое решение создается под ваши уникальные потребности.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Секция "Услуги" -->
+        <section id="services" class="services-section">
+            <div class="services-wrapper">
+                <h2 class="services-title">Наши возможности</h2>
+                <div class="services-container">
+                    <div class="service-card">
+                        <h3>01. AI-разработка</h3>
+                        <p>Создание умных веб-сайтов, приложений и платформ с интеграцией искусственного интеллекта.</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>02. AI-боты и агенты</h3>
+                        <p>Разработка интеллектуальных ботов для автоматизации продаж, поддержки клиентов и внутренних
+                            процессов.</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>03. Автоматизация процессов</h3>
+                        <p>Внедрение AI-решений для оптимизации рабочих процессов и повышения эффективности бизнеса.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Секция "Портфолио" -->
+        <section id="portfolio" class="portfolio-section">
+            <div class="container">
+                <h2>Избранные проекты</h2>
+                <div class="portfolio-grid">
+                    <a href="#" class="portfolio-item magnetic-element">
+                        <h3>AI Sales Assistant</h3>
+                        <span>Чат-бот / CRM интеграция</span>
+                        <div class="bg-element"></div>
+                    </a>
+                    <a href="#" class="portfolio-item magnetic-element">
+                        <h3>Smart Analytics Hub</h3>
+                        <span>Платформа аналитики</span>
+                        <div class="bg-element"></div>
+                    </a>
+                    <a href="#" class="portfolio-item magnetic-element">
+                        <h3>Support Automation Bot</h3>
+                        <span>AI-агент поддержки</span>
+                        <div class="bg-element"></div>
+                    </a>
+                    <a href="#" class="portfolio-item magnetic-element">
+                        <h3>Business Portal AI</h3>
+                        <span>Корпоративная платформа</span>
+                        <div class="bg-element"></div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Секция "Контакты" -->
+        <section id="contact" class="contact-section">
+            <div class="container">
+                <h2>Готовы к автоматизации?</h2>
+                <a href="mailto:contact@automatica.ai" class="contact-link magnetic-element">Свяжитесь с нами</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Подвал -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://www.instagram.com/automatica.labs/">Instagram</a>
+                <a href="https://t.me/+1nR8NbEO5Ns3ZTRi">Telegram</a>
+            </div>
+            <p class="copyright">&copy; 2025 AUTOMATICA. Автоматизация с интеллектом.</p>
+        </div>
+    </footer>
+
+    <!-- Подключение библиотек -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- 1. Инициализация библиотек (Lenis и GSAP) ---
+            const lenis = new Lenis({ lerp: 0.07 });
+            lenis.on('scroll', ScrollTrigger.update);
+            gsap.ticker.add((time) => lenis.raf(time * 1000));
+            gsap.ticker.lagSmoothing(0);
+            gsap.registerPlugin(ScrollTrigger);
+
+            // --- 2. Кастомный курсор и магнитные элементы ---
+            const cursorDot = document.querySelector('.cursor-dot');
+            const cursorOutline = document.querySelector('.cursor-outline');
+            const magneticElements = document.querySelectorAll('.magnetic-element');
+
+            window.addEventListener('mousemove', e => {
+                const { clientX, clientY } = e;
+                gsap.to(cursorDot, { x: clientX, y: clientY, duration: 0.3, ease: 'power2.out' });
+                gsap.to(cursorOutline, { x: clientX, y: clientY, duration: 0.7, ease: 'power2.out' });
+            });
+
+            // Магнитный эффект
+            magneticElements.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    gsap.to(cursorOutline, { scale: 1.5, duration: 0.3 });
+                });
+                el.addEventListener('mouseleave', () => {
+                    gsap.to(cursorOutline, { scale: 1, duration: 0.3 });
+                    gsap.to(el, { x: 0, y: 0, duration: 0.3 });
+                });
+                el.addEventListener('mousemove', e => {
+                    const rect = el.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    gsap.to(el, { x: x * 0.2, y: y * 0.4, duration: 0.3 });
+                });
+            });
+
+            // --- 3. Глобальные анимации ---
+            // Затемнение/осветление шапки
+            ScrollTrigger.create({
+                start: "top -80",
+                end: 99999,
+                toggleClass: { className: 'scrolled', targets: '.main-header' }
+            });
+
+            // Анимация разделителей
+            gsap.utils.toArray('.divider').forEach(divider => {
+                gsap.fromTo(divider,
+                    { scaleX: 0 },
+                    {
+                        scaleX: 1,
+                        duration: 1.5,
+                        ease: 'power2.inOut',
+                        scrollTrigger: {
+                            trigger: divider,
+                            start: 'top 90%',
+                            toggleActions: 'play none none reverse'
+                        }
+                    }
+                );
+            });
+
+            // --- 4. Анимации для секций (с адаптивностью) ---
+            ScrollTrigger.matchMedia({
+                // Настройки для десктопа
+                "(min-width: 769px)": function () {
+
+                    // Hero Section: "Пульс" и скрембл-анимация заголовка
+                    const heroPulse = document.querySelector('.hero-pulse');
+                    window.addEventListener('mousemove', e => {
+                        gsap.to(heroPulse, {
+                            '--x': `${e.clientX}px`,
+                            '--y': `${e.clientY}px`,
+                            background: `radial-gradient(circle at ${e.clientX}px ${e.clientY}px, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 25%)`,
+                            duration: 0.5
+                        });
+                    });
+
+                    // Анимация заголовка с эффектом "скрембл"
+                    const heroTitle = document.querySelector('.hero-title');
+                    const originalText = heroTitle.textContent;
+                    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                    heroTitle.innerHTML = '';
+                    originalText.split('').forEach(char => {
+                        const span = document.createElement('span');
+                        span.className = 'char';
+                        span.textContent = char;
+                        heroTitle.appendChild(span);
+                    });
+
+                    gsap.from(".char", {
+                        opacity: 0,
+                        y: 30,
+                        duration: 1,
+                        stagger: 0.05,
+                        onStart: function () {
+                            const tl = gsap.timeline();
+                            document.querySelectorAll('.char').forEach((char, i) => {
+                                tl.to(char, {
+                                    innerText: () => chars[Math.floor(Math.random() * chars.length)],
+                                    duration: 0.05,
+                                    repeat: 1,
+                                    yoyo: true,
+                                    repeatDelay: 0.05,
+                                    onComplete: () => {
+                                        gsap.to(char, { innerText: originalText[i], duration: 0.2 });
+                                    }
+                                }, i * 0.03);
+                            });
+                        }
+                    });
+
+                    // About Section: Появление текста по словам
+                    document.querySelectorAll(".reveal-text").forEach(p => {
+                        const words = p.textContent.trim().split(/\s+/); // Разбивка по любым пробелам
+                        p.innerHTML = words.map(word =>
+                            `<span class="word" style="display: inline-block; margin-right: 0.25em;">${word}</span>`
+                        ).join('');
+
+                        gsap.to(p.querySelectorAll('.word'), {
+                            className: 'word is-in-view',
+                            stagger: 0.05,
+                            scrollTrigger: {
+                                trigger: p,
+                                start: 'top 80%',
+                                end: 'bottom 40%',
+                                scrub: 0.5
+                            }
+                        });
+                    });
+
+                    // Services: Горизонтальный скролл с 3D-наклоном
+                    const servicesCards = gsap.utils.toArray('.service-card');
+                    if (window.innerWidth > 830) {
+                        gsap.to(servicesCards, {
+                            xPercent: -100 * (servicesCards.length - 1),
+                            ease: "none",
+                            scrollTrigger: {
+                                trigger: ".services-section",
+                                pin: ".services-wrapper",
+                                scrub: 1,
+                                end: () => "+=" + (document.querySelector(".services-container").offsetWidth - window.innerWidth)
+                            }
+                        });
+                    }
+
+                    gsap.to(servicesCards, {
+                        rotationY: -30,
+                        stagger: 0.1,
+                        scrollTrigger: {
+                            trigger: ".services-section",
+                            scrub: 1.5,
+                        }
+                    });
+
+                    // Portfolio: Появление карточек при скролле
+                    gsap.from(".portfolio-item", {
+                        y: 100,
+                        opacity: 0,
+                        stagger: 0.15,
+                        duration: 1,
+                        ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: ".portfolio-grid",
+                            start: "top 80%"
+                        }
+                    });
+                },
+
+                // Настройки для мобильных устройств
+                "(max-width: 768px)": function () {
+                    // Простое появление элементов
+                    gsap.utils.toArray('h1, h2, h3, p, a.portfolio-item').forEach(el => {
+                        gsap.from(el, {
+                            opacity: 0,
+                            y: 40,
+                            duration: 1,
+                            scrollTrigger: {
+                                trigger: el,
+                                start: 'top 90%',
+                                toggleActions: 'play none none reverse'
+                            }
+                        });
+                    });
+                }
+            });
+
+        });
+    </script>
+
+</body>
+
+</html>

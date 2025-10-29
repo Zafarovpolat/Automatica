@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUTOMATICA - Intelligent Automation Solutions</title>
+
+    <!-- Уникальные шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="./favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon/favicon-16x16.png">
+    <link rel="manifest" href="./favicon/site.webmanifest">
+
+    <style>
+        /* ============================================
+           RESET & VARIABLES
+        ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        html {
+            scroll-behavior: auto;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--black);
+            color: var(--white);
+            overflow-x: hidden;
+            position: relative;
+            cursor: none;
+            /* Убираем дефолтный курсор */
+        }
+
+        /* Убираем дефолтный курсор для всех интерактивных элементов */
+        a,
+        button,
+        input,
+        textarea,
+        select {
+            cursor: none;
+        }
+
+        /* Фоновый градиент */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ============================================
+           CUSTOM CURSOR
+        ============================================ */
+        .cursor {
+            width: 10px;
+            height: 10px;
+            background: var(--white);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: transform 0.2s ease;
+        }
+
+        .cursor-follower {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: all 0.15s ease-out;
+        }
+
+        .cursor.active {
+            transform: scale(0.5);
+        }
+
+        .cursor-follower.active {
+            transform: scale(1.5);
+            border-color: var(--white);
+        }
+
+        /* ============================================
+           PROGRESS BAR
+        ============================================ */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 9998;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--white);
+            transform-origin: left;
+            transform: scaleX(0);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* ============================================
+           NAVIGATION
+        ============================================ */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            padding: 1rem 5%;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            position: relative;
+            transition: all 0.3s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--white);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--white);
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 1px;
+            background: var(--white);
+            transition: all 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                cursor: auto;
+                /* Возвращаем курсор на мобильных */
+            }
+
+            .cursor,
+            .cursor-follower {
+                display: none;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                height: 100vh;
+                width: 70%;
+                background: rgba(0, 0, 0, 0.95);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 5rem 2rem;
+                transition: right 0.4s ease;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .hamburger {
+                display: flex;
+                z-index: 1001;
+            }
+        }
+
+        /* ============================================
+           HERO SECTION
+        ============================================ */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Pulsating circles */
+        .pulse-container {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .pulse-circle {
+            position: absolute;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 1000px;
+            padding: 0 2rem;
+        }
+
+        .hero-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 10vw, 8rem);
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 2rem;
+            letter-spacing: -2px;
+        }
+
+        .hero-title .word {
+            display: inline-block;
+            overflow: hidden;
+        }
+
+        .hero-title .char {
+            display: inline-block;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 3rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-button {
+            padding: 1rem 2.5rem;
+            background: var(--glass-bg);
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.5s;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button.primary {
+            background: var(--white);
+            color: var(--black);
+        }
+
+        .cta-button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           ABOUT SECTION
+        ============================================ */
+        .about {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 10rem 5%;
+        }
+
+        .about-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: center;
+        }
+
+        .visual-container {
+            position: relative;
+            height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .visual-pulse {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .visual-bars {
+            position: absolute;
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            height: 200px;
+        }
+
+        .visual-bar {
+            width: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        .about-text h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .about-text .number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+
+        .about-text p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            font-weight: 300;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .about-container {
+                grid-template-columns: 1fr;
+                gap: 4rem;
+            }
+
+            .visual-container {
+                height: 400px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============================================
+           SERVICES SECTION
+        ============================================ */
+        .services {
+            padding: 10rem 5%;
+            position: relative;
+        }
+
+        .services-header {
+            text-align: center;
+            margin-bottom: 6rem;
+        }
+
+        .services-header h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .services-header .subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .service-card {
+            padding: 3rem 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 0.5s;
+        }
+
+        .service-card:hover::before {
+            left: 100%;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .service-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .service-card:hover .service-icon {
+            transform: rotate(360deg) scale(1.1);
+            border-color: var(--white);
+        }
+
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .service-card p {
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* ============================================
+           PORTFOLIO SECTION
+        ============================================ */
+        .portfolio {
+            padding: 10rem 5%;
+        }
+
+        .portfolio-header {
+            text-align: center;
+            margin-bottom: 6rem;
+        }
+
+        .portfolio-header h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .portfolio-item {
+            position: relative;
+            height: 450px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .portfolio-item:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* SVG Pattern Background */
+        .portfolio-visual {
+            position: absolute;
+            inset: 0;
+            opacity: 0.2;
+        }
+
+        .portfolio-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s;
+        }
+
+        .portfolio-item:hover .portfolio-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .portfolio-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 1rem;
+        }
+
+        .portfolio-content h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .portfolio-tag {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* ============================================
+           CONTACT SECTION
+        ============================================ */
+        .contact {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 10rem 5%;
+        }
+
+        .contact-container {
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .contact h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .contact .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 4rem;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 2.5rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1.5rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            color: var(--white);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--white);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .form-group label {
+            position: absolute;
+            left: 1rem;
+            top: 1.5rem;
+            color: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s;
+            pointer-events: none;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .form-group input:focus+label,
+        .form-group input:not(:placeholder-shown)+label,
+        .form-group textarea:focus+label,
+        .form-group textarea:not(:placeholder-shown)+label {
+            top: -10px;
+            left: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--white);
+            background: var(--black);
+            padding: 0 0.5rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1.5rem;
+            background: var(--white);
+            color: var(--black);
+            border: none;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .submit-btn:hover::before {
+            width: 500px;
+            height: 500px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .success-message {
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--white);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .contact-info-item {
+            text-align: center;
+            padding: 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .contact-info-item:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .contact-info-item h4 {
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .contact-info-item p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* ============================================
+           FOOTER
+        ============================================ */
+        .footer {
+            padding: 4rem 5%;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .social-link:hover {
+            border-color: var(--white);
+            transform: translateY(-5px);
+        }
+
+        .footer-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ============================================
+           BACK TO TOP
+        ============================================ */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            z-index: 999;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            border-color: var(--white);
+        }
+
+        .back-to-top::before {
+            content: '↑';
+            color: var(--white);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* ============================================
+           SECTION DIVIDER
+        ============================================ */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+            margin: 5rem 0;
+        }
+
+        /* ============================================
+           MAGNETIC BUTTON EFFECT
+        ============================================ */
+        .magnetic {
+            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @media (max-width: 680px) {
+            .contact-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-bar-fill"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="#" class="logo">AUTOMATICA</a>
+        <ul class="nav-links">
+            <li><a href="#hero" class="active">home</a></li>
+            <li><a href="#about">about</a></li>
+            <li><a href="#services">services</a></li>
+            <li><a href="#portfolio">work</a></li>
+            <li><a href="#contact">contact</a></li>
+        </ul>
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="pulse-container">
+            <div class="pulse-circle"></div>
+            <div class="pulse-circle"></div>
+            <div class="pulse-circle"></div>
+            <div class="pulse-circle"></div>
+        </div>
+
+        <div class="hero-content">
+            <div class="hero-label">&lt; AI AUTOMATION SOLUTIONS /&gt;</div>
+            <h1 class="hero-title">
+                <div class="word">INTELLIGENT</div>
+                <div class="word">AUTOMATION</div>
+            </h1>
+            <p class="hero-subtitle">From websites to AI agents. We automate your business.</p>
+            <div class="cta-group">
+                <a href="#contact" class="cta-button primary magnetic"><span>START AUTOMATION</span></a>
+                <a href="#portfolio" class="cta-button magnetic"><span>OUR SOLUTIONS</span></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="about-container">
+            <div class="visual-container">
+                <div class="visual-pulse"></div>
+                <div class="visual-pulse"></div>
+                <div class="visual-pulse"></div>
+                <div class="visual-bars">
+                    <div class="visual-bar"></div>
+                    <div class="visual-bar"></div>
+                    <div class="visual-bar"></div>
+                    <div class="visual-bar"></div>
+                    <div class="visual-bar"></div>
+                    <div class="visual-bar"></div>
+                    <div class="visual-bar"></div>
+                </div>
+            </div>
+
+            <div class="about-text">
+                <div class="number">[ 01 ]</div>
+                <h2>Who We Are</h2>
+                <p class="p1">
+                    An automation studio focused on building intelligent systems that drive efficiency and growth.
+                </p>
+                <p class="p2">
+                    We specialize in integrating artificial intelligence into business processes, from web development
+                    to autonomous agents.
+                </p>
+                <p class="p3">
+                    Our mission is to empower businesses by automating complexity, allowing you to focus on what matters
+                    most.
+                </p>
+
+                <div class="stats">
+                    <div class="stat-item magnetic">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">PROJECTS</div>
+                    </div>
+                    <div class="stat-item magnetic">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">CLIENTS</div>
+                    </div>
+                    <div class="stat-item magnetic">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">SOLUTIONS</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="services-header">
+            <h2>What We Do</h2>
+            <p class="subtitle">Expertise across the digital spectrum</p>
+        </div>
+        <div class="services-grid">
+            <div class="service-card magnetic">
+                <div class="service-number">[ 01 ]</div>
+                <div class="service-icon">◑</div>
+                <h3>Custom AI Agents</h3>
+                <p>Bespoke AI agents that automate customer service, sales, and internal workflows.</p>
+            </div>
+            <div class="service-card magnetic">
+                <div class="service-number">[ 02 ]</div>
+                <div class="service-icon">◓</div>
+                <h3>Data & Analytics</h3>
+                <p>Leveraging AI to turn your data into actionable insights for smarter decisions.
+                </p>
+            </div>
+            <div class="service-card magnetic">
+                <div class="service-number">[ 03 ]</div>
+                <div class="service-icon">●</div>
+                <h3>AI Integration</h3>
+                <p>Seamlessly integrating AI services and APIs into your existing infrastructure.</p>
+            </div>
+            <div class="service-card magnetic">
+                <div class="service-number">[ 04 ]</div>
+                <div class="service-icon">○</div>
+                <h3>AI Strategy</h3>
+                <p>Developing a roadmap for AI adoption to ensure your business stays ahead of the curve.</p>
+            </div>
+        </div>
+    </section>
+    <div class="section-divider"></div>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="portfolio">
+        <div class="portfolio-header">
+            <h2>Selected Work</h2>
+            <p class="subtitle">Case studies of our automated solutions</p>
+        </div>
+        <div class="portfolio-grid">
+            <div class="portfolio-item magnetic">
+                <svg class="portfolio-visual" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="pattern1" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <circle cx="20" cy="20" r="2" fill="white" opacity="0.3" />
+                        </pattern>
+                    </defs>
+                    <rect width="400" height="400" fill="url(#pattern1)" />
+                </svg>
+                <div class="portfolio-content">
+                    <div class="portfolio-number">[ SOLUTION 01 ]</div>
+                    <h3>E-COMMERCE BOT</h3>
+                    <p class="portfolio-tag">AI Agent</p>
+                </div>
+            </div>
+
+            <div class="portfolio-item magnetic">
+                <svg class="portfolio-visual" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="pattern2" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <line x1="0" y1="0" x2="20" y2="20" stroke="white" stroke-width="0.5" opacity="0.3" />
+                        </pattern>
+                    </defs>
+                    <rect width="400" height="400" fill="url(#pattern2)" />
+                </svg>
+                <div class="portfolio-content">
+                    <div class="portfolio-number">[ SOLUTION 02 ]</div>
+                    <h3>DATA PLATFORM</h3>
+                    <p class="portfolio-tag">Analytics</p>
+                </div>
+            </div>
+
+            <div class="portfolio-item magnetic">
+                <svg class="portfolio-visual" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="pattern3" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+                            <rect x="0" y="0" width="25" height="25" fill="white" opacity="0.1" />
+                        </pattern>
+                    </defs>
+                    <rect width="400" height="400" fill="url(#pattern3)" />
+                </svg>
+                <div class="portfolio-content">
+                    <div class="portfolio-number">[ SOLUTION 03 ]</div>
+                    <h3>INTERNAL CRM</h3>
+                    <p class="portfolio-tag">Automation</p>
+                </div>
+            </div>
+
+            <div class="portfolio-item magnetic">
+                <svg class="portfolio-visual" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="200" cy="200" r="100" fill="none" stroke="white" stroke-width="0.5" opacity="0.3" />
+                    <circle cx="200" cy="200" r="150" fill="none" stroke="white" stroke-width="0.5" opacity="0.2" />
+                    <circle cx="200" cy="200" r="50" fill="none" stroke="white" stroke-width="0.5" opacity="0.4" />
+                </svg>
+                <div class="portfolio-content">
+                    <div class="portfolio-number">[ SOLUTION 04 ]</div>
+                    <h3>PREDICTIVE API</h3>
+                    <p class="portfolio-tag">AI Integration</p>
+                </div>
+            </div>
+
+            <div class="portfolio-item magnetic">
+                <svg class="portfolio-visual" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="pattern5" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+                            <path d="M0,0 L30,30 M30,0 L0,30" stroke="white" stroke-width="0.5" opacity="0.2" />
+                        </pattern>
+                    </defs>
+                    <rect width="400" height="400" fill="url(#pattern5)" />
+                </svg>
+                <div class="portfolio-content">
+                    <div class="portfolio-number">[ SOLUTION 05 ]</div>
+                    <h3>SMART DASHBOARD</h3>
+                    <p class="portfolio-tag">Web Development</p>
+                </div>
+            </div>
+
+            <div class="portfolio-item magnetic">
+                <svg class="portfolio-visual" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="0" y1="200" x2="400" y2="200" stroke="white" stroke-width="0.5" opacity="0.3" />
+                    <line x1="200" y1="0" x2="200" y2="400" stroke="white" stroke-width="0.5" opacity="0.3" />
+                    <line x1="0" y1="0" x2="400" y2="400" stroke="white" stroke-width="0.5" opacity="0.2" />
+                    <line x1="400" y1="0" x2="0" y2="400" stroke="white" stroke-width="0.5" opacity="0.2" />
+                </svg>
+                <div class="portfolio-content">
+                    <div class="portfolio-number">[ SOLUTION 06 ]</div>
+                    <h3>SUPPORT AUTOMATION</h3>
+                    <p class="portfolio-tag">AI Strategy</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="contact-container">
+            <h2>Let's Build Together</h2>
+            <p class="subtitle">Ready to automate your business?</p>
+
+            <form id="contact-form">
+                <div class="form-group">
+                    <input type="text" id="name" placeholder=" " required>
+                    <label for="name">NAME</label>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="email" placeholder=" " required>
+                    <label for="email">EMAIL</label>
+                </div>
+                <div class="form-group">
+                    <textarea id="message" placeholder=" " required></textarea>
+                    <label for="message">MESSAGE</label>
+                </div>
+                <button type="submit" class="submit-btn magnetic">SEND MESSAGE</button>
+                <div class="success-message">✓ Message sent successfully</div>
+            </form>
+
+            <div class="contact-info">
+                <div class="contact-info-item magnetic">
+                    <h4>EMAIL</h4>
+                    <p>atuin59354081@gmail.com</p>
+                </div>
+                <div class="contact-info-item magnetic">
+                    <h4>PHONE</h4>
+                    <p>+998959738888</p>
+                </div>
+                <div class="contact-info-item magnetic">
+                    <h4>LOCATION</h4>
+                    <p>Tashkent, Uzbekistan</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="social-links">
+            <a href="https://www.instagram.com/automatica.labs/" class="social-link magnetic">IG</a>
+            <a href="https://t.me/+1nR8NbEO5Ns3ZTRi" class="social-link magnetic">TG</a>
+        </div>
+        <p class="footer-text">© 2025 AUTOMATICA. ALL RIGHTS RESERVED.</p>
+    </footer>
+
+    <!-- Back to Top -->
+    <div class="back-to-top magnetic"></div>
+
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://unpkg.com/lenis@1.0.45/dist/lenis.min.js"></script>
+
+    <!-- GSAP Core & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // ============================================
+            // LENIS SMOOTH SCROLL
+            // ============================================
+
+            const lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smooth: true,
+                smoothTouch: false,
+            });
+
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+
+            requestAnimationFrame(raf);
+            lenis.on('scroll', ScrollTrigger.update);
+            gsap.ticker.add((time) => lenis.raf(time * 1000));
+            gsap.ticker.lagSmoothing(0);
+
+            // ============================================
+            // GSAP INIT
+            // ============================================
+
+            gsap.registerPlugin(ScrollTrigger);
+
+            // ============================================
+            // CUSTOM CURSOR (только desktop)
+            // ============================================
+
+            if (window.innerWidth > 768) {
+                const cursor = document.querySelector('.cursor');
+                const cursorFollower = document.querySelector('.cursor-follower');
+                let mouseX = 0, mouseY = 0;
+                let followerX = 0, followerY = 0;
+
+                // Smooth cursor movement
+                gsap.to({}, 0.016, {
+                    repeat: -1,
+                    onRepeat: function () {
+                        followerX += (mouseX - followerX) * 0.15;
+                        followerY += (mouseY - followerY) * 0.15;
+
+                        gsap.set(cursorFollower, {
+                            left: followerX - 15,
+                            top: followerY - 15
+                        });
+                    }
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    mouseX = e.clientX;
+                    mouseY = e.clientY;
+
+                    gsap.to(cursor, {
+                        left: e.clientX,
+                        top: e.clientY,
+                        duration: 0
+                    });
+                });
+
+                // Cursor hover effects
+                document.querySelectorAll('a, button, .service-card, .portfolio-item, .magnetic').forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        cursor.classList.add('active');
+                        cursorFollower.classList.add('active');
+                    });
+
+                    el.addEventListener('mouseleave', () => {
+                        cursor.classList.remove('active');
+                        cursorFollower.classList.remove('active');
+                    });
+                });
+            }
+
+            // ============================================
+            // MAGNETIC EFFECT (только desktop)
+            // ============================================
+
+
+
+            // ============================================
+            // NAVIGATION
+            // ============================================
+
+            const navbar = document.querySelector('.navbar');
+            const hamburger = document.querySelector('.hamburger');
+            const navLinks = document.querySelector('.nav-links');
+            const navItems = document.querySelectorAll('.nav-links a');
+
+            hamburger?.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navLinks.classList.toggle('active');
+            });
+
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    hamburger?.classList.remove('active');
+                    navLinks?.classList.remove('active');
+
+                    const targetId = item.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+
+                    if (targetElement) {
+                        lenis.scrollTo(targetElement, {
+                            offset: -80,
+                            duration: 1.5
+                        });
+                    }
+                });
+            });
+
+            lenis.on('scroll', ({ scroll }) => {
+                if (scroll > 100) {
+                    navbar?.classList.add('scrolled');
+                } else {
+                    navbar?.classList.remove('scrolled');
+                }
+
+                const sections = document.querySelectorAll('section');
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - 150;
+                    const sectionHeight = section.clientHeight;
+                    const sectionId = section.getAttribute('id');
+
+                    if (scroll >= sectionTop && scroll < sectionTop + sectionHeight) {
+                        navItems.forEach(item => {
+                            item.classList.remove('active');
+                            if (item.getAttribute('href') === `#${sectionId}`) {
+                                item.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // ============================================
+            // PROGRESS BAR
+            // ============================================
+
+            gsap.to('.progress-bar-fill', {
+                scaleX: 1,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: 'body',
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: 0.3
+                }
+            });
+
+            // ============================================
+            // HERO ANIMATIONS - Professional SplitText
+            // ============================================
+
+            // Animate pulse circles
+            gsap.fromTo('.pulse-circle',
+                {
+                    scale: 0,
+                    opacity: 0
+                },
+                {
+                    scale: 1,
+                    opacity: 0.3,
+                    duration: 2,
+                    stagger: 0.3,
+                    ease: 'power2.out'
+                }
+            );
+
+            // Continuous pulse animation
+            gsap.to('.pulse-circle', {
+                scale: 1.2,
+                opacity: 0,
+                duration: 4,
+                stagger: 1,
+                repeat: -1,
+                ease: 'power1.inOut'
+            });
+
+            // Split text animation
+            const heroWords = document.querySelectorAll('.hero-title .word');
+            heroWords.forEach(word => {
+                const text = word.textContent;
+                word.innerHTML = '';
+                text.split('').forEach((char, i) => {
+                    const span = document.createElement('span');
+                    span.textContent = char === ' ' ? '\u00A0' : char;
+                    span.className = 'char';
+                    span.style.display = 'inline-block';
+                    word.appendChild(span);
+                });
+            });
+
+            // Animate characters
+            const timeline = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+            timeline
+                .from('.hero-label', {
+                    opacity: 0,
+                    y: 30,
+                    duration: 1
+                })
+                .from('.hero-title .word', {
+                    opacity: 0,
+                    y: 100,
+                    rotationX: -90,
+                    transformOrigin: 'top center',
+                    stagger: 0.3,
+                    duration: 1.2,
+                    ease: 'back.out(1.7)'
+                }, '-=0.5')
+                .from('.hero-subtitle', {
+                    opacity: 0,
+                    y: 30,
+                    duration: 1
+                }, '-=0.5')
+                .from('.cta-button', {
+                    opacity: 0,
+                    scale: 0,
+                    stagger: 0.2,
+                    duration: 0.8,
+                    ease: 'back.out(2)'
+                }, '-=0.5');
+
+            // Char hover effect
+            document.querySelectorAll('.hero-title .char').forEach(char => {
+                char.addEventListener('mouseenter', () => {
+                    gsap.to(char, {
+                        y: -10,
+                        color: 'rgba(255,255,255,0.5)',
+                        duration: 0.3,
+                        ease: 'back.out(2)'
+                    });
+                });
+
+                char.addEventListener('mouseleave', () => {
+                    gsap.to(char, {
+                        y: 0,
+                        color: '#ffffff',
+                        duration: 0.3
+                    });
+                });
+            });
+
+            // ============================================
+            // ABOUT ANIMATIONS
+            // ============================================
+
+            // Visual pulses
+            gsap.from('.visual-pulse', {
+                scale: 0,
+                opacity: 0,
+                stagger: 0.2,
+                duration: 1.5,
+                ease: 'elastic.out(1, 0.5)',
+                scrollTrigger: {
+                    trigger: '.visual-container',
+                    start: 'top 70%'
+                }
+            });
+
+            // Continuous pulse
+            gsap.to('.visual-pulse', {
+                scale: 1.1,
+                opacity: 0.5,
+                duration: 2,
+                stagger: 0.5,
+                repeat: -1,
+                yoyo: true,
+                ease: 'power1.inOut'
+            });
+
+            // Visual bars animation
+            const bars = document.querySelectorAll('.visual-bar');
+            bars.forEach((bar, i) => {
+                const randomHeight = () => Math.random() * 180 + 20;
+
+                gsap.to(bar, {
+                    height: randomHeight,
+                    duration: 1.5,
+                    repeat: -1,
+                    yoyo: true,
+                    delay: i * 0.1,
+                    ease: 'power1.inOut'
+                });
+            });
+
+            // Text reveal with mask
+            gsap.from('.about-text h2', {
+                opacity: 0,
+                y: 100,
+                clipPath: 'inset(0 0 100% 0)',
+                duration: 1.2,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: '.about-text h2',
+                    start: 'top 80%'
+                }
+            });
+
+            // Paragraph stagger
+            gsap.from('.about-text p', {
+                opacity: 0,
+                x: -50,
+                stagger: 0.2,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: '.about-text',
+                    start: 'top 70%'
+                }
+            });
+
+            // Stats counter
+            const statNumbers = document.querySelectorAll('.stat-number');
+            const finalValues = [127, 45, 12];
+
+            gsap.from('.stat-item', {
+                opacity: 0,
+                y: 50,
+                stagger: 0.2,
+                duration: 0.8,
+                scrollTrigger: {
+                    trigger: '.stats',
+                    start: 'top 80%',
+                    onEnter: () => {
+                        statNumbers.forEach((stat, i) => {
+                            gsap.to(stat, {
+                                textContent: finalValues[i],
+                                duration: 2,
+                                snap: { textContent: 1 },
+                                ease: 'power1.out'
+                            });
+                        });
+                    }
+                }
+            });
+
+            // ============================================
+            // SERVICES ANIMATIONS - Reveal with Clip Path
+            // ============================================
+
+            gsap.from('.services-header h2', {
+                opacity: 0,
+                scale: 0.8,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: '.services-header',
+                    start: 'top 80%'
+                }
+            });
+
+            // Card reveal animation
+            gsap.utils.toArray('.service-card').forEach((card, i) => {
+                gsap.from(card, {
+                    opacity: 0,
+                    y: 100,
+                    rotationY: 90,
+                    duration: 1,
+                    ease: 'back.out(1.5)',
+                    scrollTrigger: {
+                        trigger: card,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    },
+                    delay: i * 0.1
+                });
+            });
+
+            // Icon rotation
+            gsap.to('.service-icon', {
+                rotation: 360,
+                duration: 20,
+                repeat: -1,
+                ease: 'none'
+            });
+
+            // ============================================
+            // PORTFOLIO - 3D Flip Reveal
+            // ============================================
+
+            gsap.from('.portfolio-header h2', {
+                opacity: 0,
+                y: 50,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: '.portfolio-header',
+                    start: 'top 80%'
+                }
+            });
+
+            // 3D flip cards
+            gsap.utils.toArray('.portfolio-item').forEach((item, i) => {
+                gsap.from(item, {
+                    opacity: 0,
+                    rotationY: -90,
+                    transformPerspective: 1000,
+                    transformOrigin: 'center center',
+                    duration: 1.2,
+                    ease: 'back.out(1.5)',
+                    scrollTrigger: {
+                        trigger: item,
+                        start: 'top 80%'
+                    },
+                    delay: i * 0.1
+                });
+
+                // SVG animation
+                const svg = item.querySelector('svg');
+                if (svg) {
+                    gsap.from(svg, {
+                        scale: 0,
+                        rotation: 180,
+                        duration: 1.5,
+                        ease: 'back.out(1.5)',
+                        scrollTrigger: {
+                            trigger: item,
+                            start: 'top 80%'
+                        }
+                    });
+                }
+            });
+
+            // ============================================
+            // CONTACT ANIMATIONS
+            // ============================================
+
+            gsap.from('.contact h2', {
+                opacity: 0,
+                scale: 0.5,
+                duration: 1,
+                ease: 'back.out(2)',
+                scrollTrigger: {
+                    trigger: '.contact h2',
+                    start: 'top 80%'
+                }
+            });
+
+            // Form reveal with stagger
+            gsap.from('.form-group', {
+                opacity: 0,
+                x: -100,
+                stagger: 0.1,
+                duration: 0.8,
+                scrollTrigger: {
+                    trigger: '.contact-container',
+                    start: 'top 70%'
+                }
+            });
+
+            gsap.from('.submit-btn', {
+                opacity: 0,
+                scale: 0,
+                duration: 0.8,
+                ease: 'back.out(2)',
+                scrollTrigger: {
+                    trigger: '.submit-btn',
+                    start: 'top 85%'
+                }
+            });
+
+            // Contact info cards
+            gsap.from('.contact-info-item', {
+                opacity: 0,
+                y: 50,
+                stagger: 0.15,
+                duration: 0.8,
+                scrollTrigger: {
+                    trigger: '.contact-info',
+                    start: 'top 80%'
+                }
+            });
+
+            // Form submit
+            const contactForm = document.getElementById('contact-form');
+            contactForm?.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const successMessage = document.querySelector('.success-message');
+                gsap.to(successMessage, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.5,
+                    ease: 'back.out(2)'
+                });
+
+                setTimeout(() => {
+                    e.target.reset();
+                    gsap.to(successMessage, {
+                        opacity: 0,
+                        y: 20,
+                        duration: 0.5
+                    });
+                }, 3000);
+            });
+
+            // ============================================
+            // FOOTER
+            // ============================================
+
+            gsap.from('.social-links', {
+                opacity: 0,
+                scale: 0,
+                stagger: 0.1,
+                duration: 0.5,
+                ease: 'back.out(2)',
+                scrollTrigger: {
+                    trigger: '.footer',
+                    start: 'top 90%'
+                }
+            });
+
+            // ============================================
+            // SECTION DIVIDERS
+            // ============================================
+
+            gsap.from('.section-divider', {
+                scaleX: 0,
+                duration: 1.5,
+                ease: 'power2.inOut',
+                scrollTrigger: {
+                    trigger: '.section-divider',
+                    start: 'top 90%'
+                }
+            });
+
+            // ============================================
+            // BACK TO TOP
+            // ============================================
+
+            const backToTop = document.querySelector('.back-to-top');
+
+            lenis.on('scroll', ({ scroll }) => {
+                if (scroll > 500) {
+                    gsap.to(backToTop, { opacity: 1, pointerEvents: 'all', duration: 0.3 });
+                } else {
+                    gsap.to(backToTop, { opacity: 0, pointerEvents: 'none', duration: 0.3 });
+                }
+            });
+
+            backToTop?.addEventListener('click', () => {
+                lenis.scrollTo(0, { duration: 2 });
+            });
+
+            // ============================================
+            // PERFORMANCE
+            // ============================================
+
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    ScrollTrigger.refresh();
+                    lenis.resize();
+                }, 250);
+            });
+
+            ScrollTrigger.refresh();
+
+            console.log('%c✨ PIXELFLOW', 'color: #fff; font-size: 20px; font-weight: bold;');
+            console.log('%cProfessional experience loaded', 'color: #999; font-size: 12px;');
+        });
+    </script>
+</body>
+
+</html>
