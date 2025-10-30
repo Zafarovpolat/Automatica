@@ -125,8 +125,12 @@
 
         .container {
             width: 90%;
-            max-width: 1400px;
+            max-width: 100vw;
             margin: 0 auto;
+        }
+
+        a {
+            cursor: none;
         }
 
         /* Анимируемый разделитель */
@@ -674,29 +678,10 @@
                 margin: 100px 0;
             }
 
-            .portfolio-item.is-title-slide {
-                /* Превращаем его в обычный заголовок, а не карточку */
-                position: static;
-                padding: 0;
-                border: none;
-                margin-bottom: 60px;
-                background: none;
-                /* Убираем фон, если он есть */
-                display: block;
-                /* Сбрасываем flex/grid стили карточки */
-            }
-
             .portfolio-item.is-title-slide h2 {
                 font-size: 3.5rem;
-                text-align: center;
             }
 
-            .portfolio-item.is-title-slide .portfolio-item-content {
-                /* Сбрасываем абсолютное позиционирование для контента заголовка */
-                position: static;
-                transform: none;
-                width: 100%;
-            }
         }
 
         /* Мобильные устройства (480px и меньше) */
@@ -1176,11 +1161,66 @@
                             }
                         });
                     });
-                    const realPortfolioItems = gsap.utils.toArray('.portfolio-item:not(.is-title-slide)');
 
-                    gsap.from(realPortfolioItems, {
-                        y: 50, opacity: 0, stagger: 0.2, duration: 0.8, ease: 'power3.out',
-                        scrollTrigger: { trigger: ".portfolio-grid", start: "top 85%", toggleActions: "play none none reverse" }
+                    // Portfolio: Появление карточек при скролле
+                    const portfolioItems = gsap.utils.toArray('.portfolio-item');
+                    const portfolioSection = document.querySelector('.portfolio-section');
+
+                    // 1. УСТАНОВКА НАЧАЛЬНЫХ СОСТОЯНИЙ (без изменений)
+                    gsap.set(portfolioItems[0], { opacity: 1, yPercent: 0 });
+                    gsap.set(portfolioItems.slice(1), { yPercent: 100, opacity: 0 });
+
+                    portfolioItems.forEach((item, index) => {
+                        gsap.set(item, { zIndex: portfolioItems.length - index });
+                    });
+
+                    // 2. СОЗДАНИЕ TIMELINE (без изменений в настройках)
+                    const portfolioTimeline = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: portfolioSection,
+                            pin: true,
+                            start: "top top",
+                            end: () => "+=" + (portfolioItems.length - 1) * 100 + "%",
+                            scrub: 2,
+                            snap: {
+                                snapTo: 1 / (portfolioItems.length - 1),
+                                duration: 0.6,
+                                ease: "power2.inOut"
+                            },
+                            invalidateOnRefresh: true
+                        }
+                    });
+
+                    // 3. ПОСТРОЕНИЕ ЦЕПОЧКИ АНИМАЦИЙ С ИСПОЛЬЗОВАНИЕМ ОБЪЕКТА EASE
+                    portfolioItems.forEach((item, index) => {
+                        if (index === portfolioItems.length - 1) return;
+
+                        const nextItem = portfolioItems[index + 1];
+
+                        // Анимация ухода ТЕКУЩЕГО слайда (item)
+                        portfolioTimeline.to(item, {
+                            // Все анимируемые свойства в одном объекте
+                            yPercent: -100,
+                            scale: 0.98,
+                            opacity: 0,
+                            // А теперь задаем персональный ease для каждого свойства
+                            ease: {
+                                yPercent: "power3.inOut",
+                                scale: "power3.inOut",
+                                opacity: "power2.in" // Резкое затухание в конце
+                            }
+                        })
+                            // Анимация появления СЛЕДУЮЩЕГО слайда (nextItem)
+                            .to(nextItem, {
+                                // Все анимируемые свойства в одном объекте
+                                yPercent: 0,
+                                opacity: 1,
+                                // И здесь тоже задаем персональный ease
+                                ease: {
+                                    yPercent: "power3.inOut",
+                                    opacity: "power2.out" // Резкое появление в начале
+                                }
+                            }, "<"); // "<" запускает эту анимацию одновременно с предыдущей
                     });
                 }
 
