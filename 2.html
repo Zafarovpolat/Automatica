@@ -177,11 +177,6 @@
             transition: background-color 0.3s ease;
         }
 
-        .main-header.scrolled {
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-        }
-
         .nav-container {
             display: flex;
             justify-content: space-between;
@@ -335,63 +330,108 @@
         }
 
         /* Portfolio Section с интерактивными карточками */
+        /* Portfolio Section с интерактивными карточками */
         .portfolio-section {
-            padding: 150px 0;
+            /* Делаем секцию "контейнером" для абсолютно позиционированных элементов */
+            position: relative;
+            /* Задаем высоту, достаточную для пиннинга. 100vh - высота видимой части. */
+            height: 100vh;
+            padding: 0;
+            /* Убираем внутренние отступы, так как управляем всем сами */
+        }
+
+        /* Контейнер для заголовка. Позиционируем его вверху. */
+        .portfolio-section .container {
+            height: 100%;
+            position: relative;
+            /* Или absolute, если нужно точное позиционирование */
+            top: 15vh;
+            /* Расположим заголовок не у самого верха, а чуть ниже */
+            z-index: 10;
+            /* Заголовок должен быть НАД карточками */
+            text-align: center;
+            width: 100%;
+            /* Убираем лишние стили, которые могут помешать */
+            max-width: 100%;
+            margin: 0;
+            padding: 0 5%;
         }
 
         .portfolio-section h2 {
             font-size: 5rem;
-            text-align: center;
-            margin-bottom: 100px;
+            margin: 0;
+            /* Сбрасываем отступы */
         }
 
+        /* Грид с карточками теперь абсолютный и занимает ВЕСЬ экран родителя (секции) */
         .portfolio-grid {
-            display: flex;
-            flex-direction: column;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Занимает все 100vh секции */
+            overflow: hidden;
         }
 
+        /* Стили для карточек и их контента остаются такими же, как в прошлый раз */
         .portfolio-item {
-            position: relative;
-            padding: 60px 0;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             text-decoration: none;
             color: var(--text-primary);
         }
 
-        .portfolio-item:first-child {
-            border-top: 1px solid var(--border-color);
+        .portfolio-item-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            text-align: center;
+            z-index: 2;
         }
 
-        .portfolio-item h3 {
+        .portfolio-item-content h3 {
             font-size: 4rem;
             font-weight: 700;
+            margin-bottom: 10px;
         }
 
-        .portfolio-item span {
+        .portfolio-item-content span {
             color: var(--text-secondary);
+            font-size: 1.1rem;
         }
 
         .portfolio-item .bg-element {
             position: absolute;
             top: 50%;
-            right: 0;
+            left: 50%;
             width: 100px;
             height: 100px;
             background: var(--text-primary);
             opacity: 0.0;
             border-radius: 50%;
-            transform: translate(100%, -50%);
-            z-index: -1;
-            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s ease-in-out;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            transition: transform 0.7s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.5s ease-in-out;
         }
 
         .portfolio-item:hover .bg-element {
-            transform: translate(-50%, -50%) scale(1.5);
-            opacity: 0.3;
+            transform: translate(-50%, -50%) scale(8);
+            opacity: 0.05;
         }
+
+        /* Стили для нового первого слайда-заголовка */
+        .portfolio-item.is-title-slide h2 {
+            font-size: 5rem;
+            line-height: 1.1;
+            text-align: center;
+        }
+
 
         /* Contact Section */
         .contact-section {
@@ -606,31 +646,6 @@
                 font-size: 1rem;
             }
 
-            /* Portfolio */
-            .portfolio-section {
-                padding: 100px 0;
-            }
-
-            .portfolio-section h2 {
-                font-size: 3.5rem;
-                margin-bottom: 60px;
-            }
-
-            .portfolio-item {
-                padding: 40px 0;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .portfolio-item h3 {
-                font-size: 2.5rem;
-                margin-bottom: 10px;
-            }
-
-            .portfolio-item span {
-                font-size: 0.9rem;
-            }
-
             /* Contact */
             .contact-section {
                 padding: 100px 0;
@@ -657,6 +672,30 @@
             /* Divider */
             .divider {
                 margin: 100px 0;
+            }
+
+            .portfolio-item.is-title-slide {
+                /* Превращаем его в обычный заголовок, а не карточку */
+                position: static;
+                padding: 0;
+                border: none;
+                margin-bottom: 60px;
+                background: none;
+                /* Убираем фон, если он есть */
+                display: block;
+                /* Сбрасываем flex/grid стили карточки */
+            }
+
+            .portfolio-item.is-title-slide h2 {
+                font-size: 3.5rem;
+                text-align: center;
+            }
+
+            .portfolio-item.is-title-slide .portfolio-item-content {
+                /* Сбрасываем абсолютное позиционирование для контента заголовка */
+                position: static;
+                transform: none;
+                width: 100%;
             }
         }
 
@@ -719,32 +758,6 @@
 
             .service-card p {
                 font-size: 0.9rem;
-            }
-
-            /* Portfolio */
-            .portfolio-section {
-                padding: 80px 0;
-            }
-
-            .portfolio-section h2 {
-                font-size: 2.5rem;
-                margin-bottom: 40px;
-            }
-
-            .portfolio-item {
-                padding: 30px 0;
-            }
-
-            .portfolio-item h3 {
-                font-size: 1.8rem;
-            }
-
-            .portfolio-item span {
-                font-size: 0.85rem;
-            }
-
-            .portfolio-item .bg-element {
-                display: none;
             }
 
             /* Contact */
@@ -864,30 +877,45 @@
 
         <!-- Секция "Портфолио" -->
         <section id="portfolio" class="portfolio-section">
-            <div class="container">
-                <h2>Избранные проекты</h2>
-                <div class="portfolio-grid">
-                    <a href="#" class="portfolio-item magnetic-element">
+            <!-- Контейнер .container больше не нужен, так как секция сама становится контейнером -->
+            <div class="portfolio-grid">
+
+                <!-- ЭТО НАШ НОВЫЙ ПЕРВЫЙ "СЛАЙД" С ЗАГОЛОВКОМ -->
+                <div class="portfolio-item is-title-slide">
+                    <div class="portfolio-item-content">
+                        <h2>Избранные проекты</h2>
+                    </div>
+                </div>
+
+                <!-- А вот и настоящие карточки проектов -->
+                <a href="#" class="portfolio-item magnetic-element">
+                    <div class="portfolio-item-content">
                         <h3>AI Sales Assistant</h3>
                         <span>Чат-бот / CRM интеграция</span>
-                        <div class="bg-element"></div>
-                    </a>
-                    <a href="#" class="portfolio-item magnetic-element">
+                    </div>
+                    <div class="bg-element"></div>
+                </a>
+                <a href="#" class="portfolio-item magnetic-element">
+                    <div class="portfolio-item-content">
                         <h3>Smart Analytics Hub</h3>
                         <span>Платформа аналитики</span>
-                        <div class="bg-element"></div>
-                    </a>
-                    <a href="#" class="portfolio-item magnetic-element">
+                    </div>
+                    <div class="bg-element"></div>
+                </a>
+                <a href="#" class="portfolio-item magnetic-element">
+                    <div class="portfolio-item-content">
                         <h3>Support Automation Bot</h3>
                         <span>AI-агент поддержки</span>
-                        <div class="bg-element"></div>
-                    </a>
-                    <a href="#" class="portfolio-item magnetic-element">
+                    </div>
+                    <div class="bg-element"></div>
+                </a>
+                <a href="#" class="portfolio-item magnetic-element">
+                    <div class="portfolio-item-content">
                         <h3>Business Portal AI</h3>
                         <span>Корпоративная платформа</span>
-                        <div class="bg-element"></div>
-                    </a>
-                </div>
+                    </div>
+                    <div class="bg-element"></div>
+                </a>
             </div>
         </section>
 
@@ -1072,16 +1100,64 @@
                     });
 
                     // Portfolio: Появление карточек при скролле
-                    gsap.from(".portfolio-item", {
-                        y: 100,
-                        opacity: 0,
-                        stagger: 0.15,
-                        duration: 1,
-                        ease: 'power3.out',
+                    const portfolioItems = gsap.utils.toArray('.portfolio-item');
+                    const portfolioSection = document.querySelector('.portfolio-section');
+
+                    // 1. УСТАНОВКА НАЧАЛЬНЫХ СОСТОЯНИЙ (без изменений)
+                    gsap.set(portfolioItems[0], { opacity: 1, yPercent: 0 });
+                    gsap.set(portfolioItems.slice(1), { yPercent: 100, opacity: 0 });
+
+                    portfolioItems.forEach((item, index) => {
+                        gsap.set(item, { zIndex: portfolioItems.length - index });
+                    });
+
+                    // 2. СОЗДАНИЕ TIMELINE (без изменений в настройках)
+                    const portfolioTimeline = gsap.timeline({
                         scrollTrigger: {
-                            trigger: ".portfolio-grid",
-                            start: "top 80%"
+                            trigger: portfolioSection,
+                            pin: true,
+                            start: "top top",
+                            end: () => "+=" + (portfolioItems.length - 1) * 100 + "%",
+                            scrub: 2,
+                            snap: {
+                                snapTo: 1 / (portfolioItems.length - 1),
+                                duration: 0.6,
+                                ease: "power2.inOut"
+                            },
+                            invalidateOnRefresh: true
                         }
+                    });
+
+                    // 3. ПОСТРОЕНИЕ ЦЕПОЧКИ АНИМАЦИЙ С ИСПОЛЬЗОВАНИЕМ ОБЪЕКТА EASE
+                    portfolioItems.forEach((item, index) => {
+                        if (index === portfolioItems.length - 1) return;
+
+                        const nextItem = portfolioItems[index + 1];
+
+                        // Анимация ухода ТЕКУЩЕГО слайда (item)
+                        portfolioTimeline.to(item, {
+                            // Все анимируемые свойства в одном объекте
+                            yPercent: -100,
+                            scale: 0.98,
+                            opacity: 0,
+                            // А теперь задаем персональный ease для каждого свойства
+                            ease: {
+                                yPercent: "power3.inOut",
+                                scale: "power3.inOut",
+                                opacity: "power2.in" // Резкое затухание в конце
+                            }
+                        })
+                            // Анимация появления СЛЕДУЮЩЕГО слайда (nextItem)
+                            .to(nextItem, {
+                                // Все анимируемые свойства в одном объекте
+                                yPercent: 0,
+                                opacity: 1,
+                                // И здесь тоже задаем персональный ease
+                                ease: {
+                                    yPercent: "power3.inOut",
+                                    opacity: "power2.out" // Резкое появление в начале
+                                }
+                            }, "<"); // "<" запускает эту анимацию одновременно с предыдущей
                     });
                 },
 
@@ -1100,7 +1176,14 @@
                             }
                         });
                     });
+                    const realPortfolioItems = gsap.utils.toArray('.portfolio-item:not(.is-title-slide)');
+
+                    gsap.from(realPortfolioItems, {
+                        y: 50, opacity: 0, stagger: 0.2, duration: 0.8, ease: 'power3.out',
+                        scrollTrigger: { trigger: ".portfolio-grid", start: "top 85%", toggleActions: "play none none reverse" }
+                    });
                 }
+
             });
 
         });
